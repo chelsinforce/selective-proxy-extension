@@ -1,71 +1,72 @@
-# Selective Proxy Extension (Chrome MV3)
+# Selective Domain Proxy
 
-Extension Chrome (Manifest V3, Chrome 108+) qui active un proxy HTTP authentifié
-**uniquement sur les domaines cibles**, avec authentification transparente
-(aucune popup, aucune erreur ERR_TUNNEL_CONNECTION_FAILED). Tout le reste de la
-navigation utilise la connexion directe de l'utilisateur.
+A Chrome extension (Manifest V3, Chrome 108+) that routes **only specific
+domains** through an authenticated HTTP proxy, with transparent proxy
+authentication (no popup, no `ERR_TUNNEL_CONNECTION_FAILED`). All other traffic
+uses the browser's direct connection.
 
-Cas d'usage : forcer une IP sortante spécifique sur un domaine précis (accès
-géo-restreint, IP de sortie maîtrisée, tests multi-régions) sans router tout le
-trafic du poste.
+Typical use cases: force a specific exit IP on a single domain (geo-restricted
+access, controlled outbound IP, multi-region testing) without routing the whole
+machine through a proxy.
 
-## Pourquoi cette extension
+## Why this extension
 
-Les extensions proxy classiques (ZeroOmega, FoxyProxy) échouent souvent à passer
-l'authentification proxy sur les tunnels HTTPS en Manifest V3. Chrome exige la
-permission `webRequestAuthProvider` combinée à un listener
-`chrome.webRequest.onAuthRequired` en mode `asyncBlocking` pour injecter les
-identifiants sur le challenge 407 du proxy. Cette extension implémente exactement
-ce mécanisme, et ne répond qu'aux challenges du proxy (`details.isProxy`), jamais
-aux authentifications de sites web, pour ne pas exposer les identifiants proxy à
-un tiers.
+Generic proxy switchers (ZeroOmega, FoxyProxy) often fail to pass proxy
+authentication on HTTPS CONNECT tunnels under Manifest V3. Chrome requires the
+`webRequestAuthProvider` permission combined with a
+`chrome.webRequest.onAuthRequired` listener in `asyncBlocking` mode to answer the
+proxy's 407 challenge. This extension implements exactly that, and only answers
+proxy challenges (`details.isProxy`), never website 401s, so proxy credentials
+are never exposed to a third-party site.
 
-## Fonctionnalités
+## Features
 
-- Routage sélectif par domaine via un PAC script dynamique (domaines cibles vers
-  le proxy, tout le reste en DIRECT).
-- Authentification proxy transparente (username / password), robuste à la
-  suspension du service worker MV3 (lecture des identifiants depuis le storage au
-  moment du challenge).
-- Page d'options et popup d'état (test de connexion intégré, IP de sortie
-  affichée).
-- Failsafe : coupure automatique du routage sur échecs de tunnel répétés, avec
-  notification, la navigation continue en direct au lieu d'être bloquée.
+- Per-domain routing via a dynamic PAC script (target domains to the proxy,
+  everything else DIRECT).
+- Transparent proxy authentication, robust to MV3 service worker suspension
+  (credentials are read from storage at the auth challenge).
+- Options page and status popup with a built-in connection test that shows the
+  live exit IP.
+- Failsafe: routing is disabled automatically after repeated tunnel failures,
+  with a notification; browsing continues directly instead of being blocked.
 
-## Installation (mode développeur)
+## Install (developer mode)
 
-1. Cloner ou télécharger ce dépôt.
-2. Ouvrir `chrome://extensions`, activer le "Mode développeur".
-3. "Charger l'extension non empaquetée", sélectionner le dossier de l'extension.
-4. Clic droit sur l'icône > Options, renseigner serveur, port, identifiants et
-   domaines cibles. Enregistrer.
+1. Download or clone this repository.
+2. Open `chrome://extensions`, enable "Developer mode".
+3. Click "Load unpacked" and select the extension folder.
+4. Right-click the extension icon > Options. Fill in proxy host, port,
+   credentials and target domains. Save and test.
 
 ## Configuration
 
-| Champ            | Exemple                     | Rôle                                  |
-|------------------|-----------------------------|---------------------------------------|
-| Serveur proxy    | proxy.exemple.com           | Hôte du proxy                         |
-| Port             | 7777                        | Port du proxy                         |
-| Identifiant      | user                        | Username d'authentification proxy     |
-| Mot de passe     | ******                      | Password d'authentification proxy     |
-| Domaines cibles  | example.com                 | Un par ligne, sous-domaines inclus    |
+| Field         | Example             | Purpose                              |
+|---------------|---------------------|--------------------------------------|
+| Proxy host    | proxy.example.com   | Proxy hostname                       |
+| Port          | 8080                | Proxy port                           |
+| Username      | user                | Proxy auth username                  |
+| Password      | ******              | Proxy auth password                  |
+| Target domains| example.com         | One per line, subdomains included    |
 
-## Déploiement en parc
+The connection test routes `ipinfo.io` through the proxy to report the actual
+exit IP. Since any target domain and the diagnostic endpoint share the same
+proxy in the PAC, the reported IP is the one target sites see.
 
-- Chrome Web Store en visibilité non répertoriée (installation en un clic, sans
-  mode développeur).
-- Force-install via console d'administration (Google Workspace, Intune, GPO) avec
+## Deployment at scale
+
+- Chrome Web Store, unlisted visibility (one-click install, no developer mode).
+- Force-install via an admin console (Google Workspace, Intune, GPO) using
   `ExtensionInstallForcelist`.
 
-## Limites connues
+## Known limitations
 
-- Chrome et navigateurs Chromium (Edge, Brave) avec le même paquet.
-- Une seule extension peut contrôler `chrome.proxy` à la fois : désactiver les
-  autres extensions proxy avant activation.
-- Le proxy HTTP ne couvre pas WebRTC. Pour un besoin strict de non-exposition de
-  l'IP réelle, contraindre WebRTC au niveau du navigateur
-  (webRTCIPHandlingPolicy = disable_non_proxied_udp).
+- Chrome and Chromium browsers (Edge, Brave) with the same package.
+- Only one extension can control `chrome.proxy` at a time: disable other proxy
+  extensions before enabling this one.
+- HTTP proxies do not cover WebRTC. If you strictly need to prevent real-IP
+  exposure, constrain WebRTC at the browser level
+  (`webRTCIPHandlingPolicy = disable_non_proxied_udp`).
 
-## Licence
+## License
 
-MIT. Voir le fichier LICENSE.
+MIT. See the LICENSE file.
