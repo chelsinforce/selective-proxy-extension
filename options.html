@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Selective Domain Proxy: settings</title>
+  <style>
+    :root { --ink:#1d2430; --muted:#5b6472; --line:#d8dde4; --accent:#0f5fbe; --ok:#1a7f4b; --ko:#b3261e; --bg:#f6f7f9; }
+    * { box-sizing: border-box; }
+    body { font-family:-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); margin:0; padding:40px 16px; display:flex; justify-content:center; }
+    main { background:#fff; border:1px solid var(--line); border-radius:10px; padding:28px 32px; width:100%; max-width:520px; }
+    h1 { font-size:18px; margin:0 0 4px; }
+    p.hint { color:var(--muted); font-size:13px; margin:0 0 24px; }
+    label { display:block; font-size:13px; font-weight:600; margin:16px 0 6px; }
+    input, textarea { width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:6px; font-size:14px; font-family:inherit; }
+    input:focus, textarea:focus { outline:2px solid var(--accent); border-color:var(--accent); }
+    textarea { resize:vertical; min-height:64px; font-family:ui-monospace,monospace; }
+    .row { display:flex; gap:12px; }
+    .row > div { flex:1; }
+    small { color:var(--muted); display:block; margin-top:4px; }
+    button { margin-top:24px; background:var(--accent); color:#fff; border:none; border-radius:6px; padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; }
+    button:hover { filter:brightness(1.08); }
+    button:disabled { opacity:.5; cursor:default; }
+    #status { margin-left:12px; font-size:13px; color:var(--muted); }
+    #status.ok { color:var(--ok); }
+    #status.ko { color:var(--ko); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Selective Domain Proxy</h1>
+    <p class="hint">The proxy applies only to the target domains below. All other browsing uses your normal connection.</p>
+
+    <div class="row">
+      <div>
+        <label for="proxyHost">Proxy host</label>
+        <input id="proxyHost" type="text" spellcheck="false" placeholder="proxy.example.com">
+      </div>
+      <div>
+        <label for="proxyPort">Port</label>
+        <input id="proxyPort" type="number" min="1" max="65535" placeholder="8080">
+      </div>
+    </div>
+
+    <label for="username">Username</label>
+    <input id="username" type="text" autocomplete="off" spellcheck="false" placeholder="proxy username">
+
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="off">
+
+    <label for="domains">Target domains (one per line)</label>
+    <textarea id="domains" spellcheck="false"></textarea>
+    <small>Subdomains are included automatically (example.com also covers www, cdn, etc.).</small>
+
+    <button id="save">Save and test</button>
+    <span id="status"></span>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Selective Domain Proxy",
+  "version": "1.1.0",
+  "description": "Route only specific domains through an authenticated HTTP proxy, with transparent authentication. All other traffic uses your direct connection.",
+  "minimum_chrome_version": "108",
+  "permissions": [
+    "proxy",
+    "storage",
+    "webRequest",
+    "webRequestAuthProvider",
+    "notifications"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "icons": {
+    "128": "icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icon128.png"
+    }
+  }
+}
